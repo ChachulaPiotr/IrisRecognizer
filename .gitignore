@@ -1,0 +1,8 @@
+.asv
+*.toc
+*.gz
+*.log
+*.aux
+*.asv
+*.iml
+*.Xml
