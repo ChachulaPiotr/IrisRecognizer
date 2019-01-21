@@ -42,6 +42,10 @@ class NN:
         self.ao = [1.0] * self.no
         self.sh = [1.0] * self.nh
 
+        # normalization parameters
+        self.max = [0.0] * (self.ni - 1)
+        self.min = [10.0] * (self.ni - 1)
+
         # create weights
         self.wi = makeMatrix(self.nh, self.ni)
         self.wo = makeMatrix(self.no, self.nh)
@@ -84,19 +88,27 @@ class NN:
         # self.wo[0][3] = 3.1652
         # self.wo[0][4] = 0.5
         # self.wo[0][5] = 2
-
+        # self.max[0] = 7.9
+        # self.max[1] = 4.4
+        # self.max[2] = 6.9
+        # self.max[3] = 2.5
+        # self.min[0] = 4.3
+        # self.min[1] = 2.0
+        # self.min[2] = 1.0
+        # self.min[3] = 0.1
 
     def update(self, inputs):
+        inputs = self.normalize(inputs)
         if len(inputs) != self.ni - 1:
             raise ValueError('wrong number of inputs')
 
         # input activations
         for i in range(self.ni - 1):
             # self.ai[i] = sigmoid(inputs[i])
-            self.ai[i] = float(inputs[i])
+            self.ai[i] = inputs[i]
 
         # hidden activations
-        for j in range(self.nh-1):
+        for j in range(self.nh - 1):
             sum = 0.0
             for i in range(self.ni):
                 sum = sum + self.ai[i] * self.wi[j][i]
@@ -108,10 +120,11 @@ class NN:
             sum = 0.0
             for j in range(self.nh):
                 sum = sum + (self.ah[j] * self.wo[k][j])
-            #print(str(sum) +"\n")
-            #self.ao[k] = sigmoid(sum)
+            # print(str(sum) +"\n")
+            # self.ao[k] = sigmoid(sum)
             self.ao[k] = sum
-
+        if self.ao[0] > 1000:
+            print(self.ao[0])
         return self.ao[:]
 
     def backPropagate(self, targets, N):
@@ -122,7 +135,7 @@ class NN:
         output_deltas = [0.0] * self.no
         for k in range(self.no):
             error = targets[k] - self.ao[k]
-            #output_deltas[k] = dsigmoid(self.ao[k]) * error
+            # output_deltas[k] = dsigmoid(self.ao[k]) * error
             output_deltas[k] = error
 
         # calculate error terms for hidden
@@ -130,7 +143,7 @@ class NN:
         for j in range(self.nh):
             error = 0.0
             for k in range(self.no):
-                #error = error + output_deltas[k] * self.wo[j][k]
+                # error = error + output_deltas[k] * self.wo[j][k]
                 error = error + output_deltas[k] * self.wo[k][j]
             hidden_deltas[j] = dsigmoid(self.sh[j]) * error
 
@@ -153,7 +166,6 @@ class NN:
             error = error + 0.5 * (targets[k] - self.ao[k]) ** 2
         return error
 
-
     def test(self, patterns):
         for p in patterns:
             print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
@@ -169,17 +181,31 @@ class NN:
 
     def train(self, patterns, iterations=400, N=0.1):
         # N: learning rate
+        for p in patterns:
+            for i in range(self.ni - 1):
+                if float(p[0][i]) > self.max[i]:
+                    self.max[i] = float(p[0][i])
+                if float(p[0][i]) < self.min[i]:
+                    self.min[i] = float(p[0][i])
         for i in range(iterations):
-            #error = 0.0
+            error = 0.0
             for p in patterns:
                 inputs = p[0]
                 targets = p[1]
                 self.update(inputs)
                 error = self.backPropagate(targets, N)
-                # print('error %-.5f' % self.backPropagate(targets, N))
-            if i % 100 == 0:
+                #error = error + 0.5 * (targets[0] - self.ao[0]) ** 2
+                #print(error, '->', targets[0], '->', self.ao[0])
+                #print('error %-.5f' % self.backPropagate(targets, N))
+            #self.backPropagate(targets, N, error/len(patterns))
+            if i % 10 == 0:
                 print('error %-.5f' % error)
 
+    def normalize(self, inputs, ru=1, rd=-1):
+        ninputs = [0.0] * (self.ni - 1)
+        for i in range(self.ni - 1):
+            ninputs[i] = ((ru - rd) * (float(inputs[i]) - self.min[i]) / (self.max[i] - self.min[i])) + rd
+        return ninputs
 
 
 def demo():
@@ -189,10 +215,10 @@ def demo():
     with open('iris2.txt') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            #print(row[0] + " " + row[1])
-            #print(row[2] + " " + row[3])
-            #print(row[4] + "\n")
-            arr.append([])      # array for one flower
+            # print(row[0] + " " + row[1])
+            # print(row[2] + " " + row[3])
+            # print(row[4] + "\n")
+            arr.append([])  # array for one flower
             arr[-1].append([])  # array for input data
             arr[-1].append([])  # array for output data
 
@@ -200,11 +226,11 @@ def demo():
             arr[-1][0].append(row[1])
             arr[-1][0].append(row[2])
             arr[-1][0].append(row[3])
-            if(row[4] == 'Iris-setosa'):
+            if (row[4] == 'Iris-setosa'):
                 row[4] = 1.0
-            elif(row[4] == 'Iris-versicolor'):
+            elif (row[4] == 'Iris-versicolor'):
                 row[4] = 2.0
-            elif(row[4] == 'Iris-virginica'):
+            elif (row[4] == 'Iris-virginica'):
                 row[4] = 3.0
             else:
                 print('Something went wrong')
@@ -213,10 +239,10 @@ def demo():
     with open('iris.txt') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            #print(row[0] + " " + row[1])
-            #print(row[2] + " " + row[3])
-            #print(row[4] + "\n")
-            arr2.append([])      # array for one flower
+            # print(row[0] + " " + row[1])
+            # print(row[2] + " " + row[3])
+            # print(row[4] + "\n")
+            arr2.append([])  # array for one flower
             arr2[-1].append([])  # array for input data
             arr2[-1].append([])  # array for output data
 
@@ -224,36 +250,39 @@ def demo():
             arr2[-1][0].append(row[1])
             arr2[-1][0].append(row[2])
             arr2[-1][0].append(row[3])
-            if(row[4] == 'Iris-setosa'):
+            if (row[4] == 'Iris-setosa'):
                 row[4] = 1.0
-            elif(row[4] == 'Iris-versicolor'):
+            elif (row[4] == 'Iris-versicolor'):
                 row[4] = 2.0
-            elif(row[4] == 'Iris-virginica'):
+            elif (row[4] == 'Iris-virginica'):
                 row[4] = 3.0
             else:
                 print('Something went wrong')
             arr2[-1][1].append(row[4])
 
-
     # for i in arr:
     #     print(i)
 
     # create a network with four input, five hidden, and one output nodes
-    n = NN(4, 5, 1)
+    n = NN(4, 6, 1)
     # train it with some patterns
     #n.test(arr2)
-    n.train(arr2,400,0.2)
+    n.train(arr2, 400, 0.01)
     # test it
-    #n.test(arr2)
-    #p = ([6.2, 3.4, 5.3, 2.3], [3.0])
+    n.test(arr2)
+    # p = ([6.2, 3.4, 5.3, 2.3], [3.0])
     p = ([5.9, 3.0, 5.1, 1.8], [3.0])
-    l = ([5.2, 2.7, 2.7, 4.0], [2.0])
-    z = ([5.7, 4.4, 4.4, 1.5], [1.0])
-    m = ([4.6, 3.2, 3.2, 1.4], [1.0])
+    #l = ([5.2, 2.7, 2.7, 4.0], [2.0])
+    #z = ([5.7, 4.4, 4.4, 1.5], [1.0])
+    #m = ([4.6, 3.2, 3.2, 1.4], [1.0])
     print(p[0], '->', n.update(p[0]), '==', round(n.update(p[0])[0]), '->', p[1])
-    print(l[0], '->', n.update(l[0]), '==', round(n.update(l[0])[0]), '->', l[1])
-    print(z[0], '->', n.update(z[0]), '==', round(n.update(z[0])[0]), '->', z[1])
-    print(m[0], '->', n.update(m[0]), '==', round(n.update(m[0])[0]), '->', m[1])
+    p = ([6.0, 2.7, 5.1, 1.6], [2.0])
+    print(p[0], '->', n.update(p[0]), '==', round(n.update(p[0])[0]), '->', p[1])
+    #print(l[0], '->', n.update(l[0]), '==', round(n.update(l[0])[0]), '->', l[1])
+    #print(z[0], '->', n.update(z[0]), '==', round(n.update(z[0])[0]), '->', z[1])
+    #print(m[0], '->', n.update(m[0]), '==', round(n.update(m[0])[0]), '->', m[1])
+    print(n.wi)
+
 
 if __name__ == '__main__':
     demo()
