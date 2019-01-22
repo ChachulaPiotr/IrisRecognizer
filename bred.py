@@ -231,7 +231,7 @@ class NN:
         return ninputs
 
 
-def demo():
+def demo(border=50, iterations=1000, N=0.05):
     arr = []
 
     with open('iris.txt') as csv_file:
@@ -273,7 +273,7 @@ def demo():
     # train it with some patterns
 
     #setting ratio between teaching and veryfing collection
-    border = 95
+    #border = 95
     #!!!!
     border = round(50*border/100)
     teach = []
@@ -291,7 +291,7 @@ def demo():
         teach.append(virginica[rows[i]])
     for i in range(border, 50):
         verify.append(virginica[rows[i]])
-    n.train(teach, 1000, 0.05)
+    n.train(teach, iterations, N)
     # test it
     n.test(verify)
 
