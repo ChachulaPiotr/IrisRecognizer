@@ -2,6 +2,8 @@ import math
 import random
 import string
 import csv
+from tabulate import tabulate
+import numpy as np
 
 random.seed(0)
 
@@ -41,6 +43,7 @@ class NN:
         self.ah = [1.0] * self.nh
         self.ao = [1.0] * self.no
         self.sh = [1.0] * self.nh
+        self.so = [1.0] * self.no
 
         # normalization parameters
         self.max = [0.0] * (self.ni - 1)
@@ -121,7 +124,8 @@ class NN:
             for j in range(self.nh):
                 sum = sum + (self.ah[j] * self.wo[k][j])
             # print(str(sum) +"\n")
-            # self.ao[k] = sigmoid(sum)
+            #self.ao[k] = sigmoid(sum)
+            #self.so[k] = self.ao[k]
             self.ao[k] = sum
         if self.ao[0] > 1000:
             print(self.ao[0])
@@ -135,7 +139,7 @@ class NN:
         output_deltas = [0.0] * self.no
         for k in range(self.no):
             error = targets[k] - self.ao[k]
-            # output_deltas[k] = dsigmoid(self.ao[k]) * error
+            #output_deltas[k] = dsigmoid(self.so[k]) * error
             output_deltas[k] = error
 
         # calculate error terms for hidden
@@ -163,12 +167,40 @@ class NN:
         # calculate error
         error = 0.0
         for k in range(len(targets)):
-            error = error + 0.5 * (targets[k] - self.ao[k]) ** 2
+           error = error + 0.5 * (targets[k] - self.ao[k]) ** 2
         return error
 
     def test(self, patterns):
+        mb = makeMatrix(3, 3, 0.0)
         for p in patterns:
             print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
+            if (p[1][0] == 1) & (round(self.ao[0]) == 1):
+                mb[0][0] = mb[0][0] + 1
+            elif (p[1][0] == 1) & (round(self.ao[0]) == 2):
+                mb[1][0] = mb[1][0] + 1
+            elif (p[1][0] == 1) & (round(self.ao[0]) == 3):
+                mb[2][0] = mb[2][0] + 1
+            elif (p[1][0] == 2) & (round(self.ao[0]) == 1):
+                mb[0][1] = mb[0][1] + 1
+            elif (p[1][0] == 2) & (round(self.ao[0]) == 2):
+                mb[1][1] = mb[1][1] + 1
+            elif (p[1][0] == 2) & (round(self.ao[0]) == 3):
+                mb[2][1] = mb[2][1] + 1
+            elif (p[1][0] == 3) & (round(self.ao[0]) == 1):
+                mb[0][2] = mb[0][2] + 1
+            elif (p[1][0] == 3) & (round(self.ao[0]) == 2):
+                mb[1][2] = mb[1][2] + 1
+            elif (p[1][0] == 3) & (round(self.ao[0]) == 3):
+                mb[2][2] = mb[2][2] + 1
+                print('sdfa')
+        self.printmb(mb)
+
+    def printmb(self, mb):
+        print(tabulate([['', 'Setosa', mb[0][0], mb[0][1], mb[0][2]],
+                        ['Predicted', 'Versicolor', mb[1][0], mb[1][1], mb[1][2]],
+                        ['Class', 'Virginica', mb[2][0], mb[2][1], mb[2][2]]],
+                       headers=['\nSetosa', 'Actual Class\nVersicolor', '\nVirginica'],
+                       tablefmt="plain"))
 
     def weights(self):
         print('Input weights:')
@@ -189,14 +221,19 @@ class NN:
                     self.min[i] = float(p[0][i])
         for i in range(iterations):
             error = 0.0
+            k = 0
             for p in patterns:
+                k = k+1
                 inputs = p[0]
                 targets = p[1]
                 self.update(inputs)
-                error = self.backPropagate(targets, N)
+                #error = self.backPropagate(targets, N)
+                error = error + self.backPropagate(targets, N)
                 #error = error + 0.5 * (targets[0] - self.ao[0]) ** 2
                 #print(error, '->', targets[0], '->', self.ao[0])
                 #print('error %-.5f' % self.backPropagate(targets, N))
+                #if (k == 10):
+                    #self.backPropagate(targets, N, error / len(patterns))
             #self.backPropagate(targets, N, error/len(patterns))
             if i % 10 == 0:
                 print('error %-.5f' % error)
@@ -259,29 +296,65 @@ def demo():
             else:
                 print('Something went wrong')
             arr2[-1][1].append(row[4])
+            # setosa = makeMatrix(50, 4, 0.0)
+            # versicolor = makeMatrix(50, 4, 0.0)
+            # virginica = makeMatrix(50, 4, 0.0)
+            setosa = []
+            versicolor = []
+            virginica = []
+            k = 0
+            for r in arr2:
+                k = k + 1
+                if k <= 50:
+                    setosa.append(r)
+                elif k <= 100:
+                    versicolor.append(r)
+                else:
+                    virginica.append(r)
+        print(setosa)
 
     # for i in arr:
     #     print(i)
 
     # create a network with four input, five hidden, and one output nodes
-    n = NN(4, 6, 1)
+    n = NN(4, 5, 1)
     # train it with some patterns
     #n.test(arr2)
-    n.train(arr2, 400, 0.01)
+
+    #setting ratio between teaching and veryfing collection
+    border = 95
+    #
+    border = round(50*border/100)
+    teach = []
+    verify = []
+    rows = np.random.permutation(50)
+    for i in range(border):
+        teach.append(setosa[rows[i]])
+    for i in range(border, 50):
+        verify.append(setosa[rows[i]])
+    for i in range(border):
+        teach.append(versicolor[rows[i]])
+    for i in range(border, 50):
+        verify.append(versicolor[rows[i]])
+    for i in range(border):
+        teach.append(virginica[rows[i]])
+    for i in range(border, 50):
+        verify.append(virginica[rows[i]])
+    n.train(teach, 1000, 0.05)
     # test it
-    n.test(arr2)
+    n.test(verify)
     # p = ([6.2, 3.4, 5.3, 2.3], [3.0])
-    p = ([5.9, 3.0, 5.1, 1.8], [3.0])
+    #p = ([5.9, 3.0, 5.1, 1.8], [3.0])
     #l = ([5.2, 2.7, 2.7, 4.0], [2.0])
     #z = ([5.7, 4.4, 4.4, 1.5], [1.0])
     #m = ([4.6, 3.2, 3.2, 1.4], [1.0])
-    print(p[0], '->', n.update(p[0]), '==', round(n.update(p[0])[0]), '->', p[1])
-    p = ([6.0, 2.7, 5.1, 1.6], [2.0])
-    print(p[0], '->', n.update(p[0]), '==', round(n.update(p[0])[0]), '->', p[1])
+    #print(p[0], '->', n.update(p[0]), '==', round(n.update(p[0])[0]), '->', p[1])
+    #p = ([6.0, 2.7, 5.1, 1.6], [2.0])
+    #print(p[0], '->', n.update(p[0]), '==', round(n.update(p[0])[0]), '->', p[1])
     #print(l[0], '->', n.update(l[0]), '==', round(n.update(l[0])[0]), '->', l[1])
     #print(z[0], '->', n.update(z[0]), '==', round(n.update(z[0])[0]), '->', z[1])
     #print(m[0], '->', n.update(m[0]), '==', round(n.update(m[0])[0]), '->', m[1])
-    print(n.wi)
+    #print(n.wi)
 
 
 if __name__ == '__main__':
