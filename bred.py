@@ -166,7 +166,8 @@ class NN:
     def test(self, patterns):
         mb = makeMatrix(3, 3, 0.0)
         for p in patterns:
-            print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
+            #print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
+            self.update(p[0])
             if (p[1][0] == 1) & (round(self.ao[0]) == 1):
                 mb[0][0] = mb[0][0] + 1
             elif (p[1][0] == 1) & (round(self.ao[0]) == 2):
@@ -185,7 +186,6 @@ class NN:
                 mb[1][2] = mb[1][2] + 1
             elif (p[1][0] == 3) & (round(self.ao[0]) == 3):
                 mb[2][2] = mb[2][2] + 1
-                print('sdfa')
         self.printmb(mb)
 
     def printmb(self, mb):
@@ -223,6 +223,7 @@ class NN:
                 error = error + self.backPropagate(targets, N)
             if i % 10 == 0:
                 print('error %-.5f' % error)
+                if error < 0.00001: break
 
     def normalize(self, inputs, ru=1, rd=-1):
         ninputs = [0.0] * (self.ni - 1)
@@ -231,7 +232,7 @@ class NN:
         return ninputs
 
 
-def demo(border=50, iterations=1000, N=0.05):
+def demo(border=50, iterations=1000, N=0.05, nn = 1):
     arr = []
 
     with open('iris.txt') as csv_file:
@@ -266,10 +267,9 @@ def demo(border=50, iterations=1000, N=0.05):
                     versicolor.append(r)
                 else:
                     virginica.append(r)
-        print(setosa)
 
     # create a network with four input, five hidden, and one output nodes
-    n = NN(4, 5, 1)
+    n = NN(4, nn, 1)
     # train it with some patterns
 
     #setting ratio between teaching and veryfing collection
@@ -292,9 +292,10 @@ def demo(border=50, iterations=1000, N=0.05):
     for i in range(border, 50):
         verify.append(virginica[rows[i]])
     n.train(teach, iterations, N)
+    n.test(teach)
     # test it
     n.test(verify)
 
 
 if __name__ == '__main__':
-    demo()
+    demo(90, 1000, 0.01, 5)
