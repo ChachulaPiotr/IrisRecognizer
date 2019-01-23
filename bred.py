@@ -228,7 +228,7 @@ class NN:
                 targets = p[1]
                 self.update(inputs)
                 error = error + self.backPropagate(targets, N)
-                im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
+                #im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
                 print(k)
             if i % 10 == 0:
                 print('error %-.5f' % error)
@@ -314,4 +314,4 @@ def calculate(setosa, versicolor, virginica, border=50):
         verify.append(virginica[rows[i]])
 
 if __name__ == '__main__':
-    demo(75, 1, 0.1, 5)
+    demo(75, 1000, 0.01, 5)
