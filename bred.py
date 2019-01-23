@@ -2,11 +2,10 @@ import math
 import random
 import string
 import csv
-#import tabulate
-import static as static
+#import static as static
 from tabulate import tabulate
 import numpy as np
-
+from ImageMaker import ImageMaker
 random.seed(0)
 
 
@@ -54,6 +53,8 @@ class NN:
         # create weights
         self.wi = makeMatrix(self.nh, self.ni)
         self.wo = makeMatrix(self.no, self.nh)
+        self.ri = makeMatrix(self.nh, self.ni)
+        self.ro = makeMatrix(self.no, self.nh)
         # set them to random values
         for i in range(self.ni):
             for j in range(self.nh):
@@ -152,12 +153,14 @@ class NN:
             for k in range(self.no):
                 change = output_deltas[k] * self.ah[j]
                 self.wo[k][j] = self.wo[k][j] + N * change
+                self.ro[k][j] = change
 
         # update input weights
         for i in range(self.ni):
             for j in range(self.nh):
                 change = hidden_deltas[j] * self.ai[i]
                 self.wi[j][i] = self.wi[j][i] + N * change
+                self.ri[j][i] = change
 
         # calculate error
         error = 0.0
@@ -208,6 +211,8 @@ class NN:
 
     def train(self, patterns, iterations=400, N=0.1):
         # N: learning rate
+        im = ImageMaker(self.nh-1)
+        name = 0
         for p in patterns:
             for i in range(self.ni - 1):
                 if float(p[0][i]) > self.max[i]:
@@ -223,8 +228,12 @@ class NN:
                 targets = p[1]
                 self.update(inputs)
                 error = error + self.backPropagate(targets, N)
+                im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
+                print(k)
             if i % 10 == 0:
                 print('error %-.5f' % error)
+                #im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, name)
+                name = name+1
                 if error < 0.00001: break
 
     def normalize(self, inputs, ru=1, rd=-1):
@@ -285,6 +294,7 @@ def demo(border=50, iterations=1000, N=0.05, nn = 1):
     # test it
     n.test(verify)
 
+
 teach = []
 verify = []
 
@@ -304,4 +314,4 @@ def calculate(setosa, versicolor, virginica, border=50):
         verify.append(virginica[rows[i]])
 
 if __name__ == '__main__':
-    demo(90, 1000, 0.01, 5)
+    demo(75, 1, 0.1, 5)
