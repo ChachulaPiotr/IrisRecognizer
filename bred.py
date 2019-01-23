@@ -2,6 +2,8 @@ import math
 import random
 import string
 import csv
+#import tabulate
+import static as static
 from tabulate import tabulate
 import numpy as np
 
@@ -231,14 +233,13 @@ class NN:
             ninputs[i] = ((ru - rd) * (float(inputs[i]) - self.min[i]) / (self.max[i] - self.min[i])) + rd
         return ninputs
 
-
 def demo(border=50, iterations=1000, N=0.05, nn = 1):
     arr = []
 
     with open('iris.txt') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            arr.append([])  # array for one flower
+            arr.append([])      # array for one flower
             arr[-1].append([])  # array for input data
             arr[-1].append([])  # array for output data
 
@@ -276,8 +277,18 @@ def demo(border=50, iterations=1000, N=0.05, nn = 1):
     #border = 95
     #!!!!
     border = round(50*border/100)
-    teach = []
-    verify = []
+
+    calculate(setosa, versicolor, virginica, border)
+
+    n.train(teach, iterations, N)
+    n.test(teach)
+    # test it
+    n.test(verify)
+
+teach = []
+verify = []
+
+def calculate(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
     for i in range(border):
         teach.append(setosa[rows[i]])
@@ -291,11 +302,6 @@ def demo(border=50, iterations=1000, N=0.05, nn = 1):
         teach.append(virginica[rows[i]])
     for i in range(border, 50):
         verify.append(virginica[rows[i]])
-    n.train(teach, iterations, N)
-    n.test(teach)
-    # test it
-    n.test(verify)
-
 
 if __name__ == '__main__':
     demo(90, 1000, 0.01, 5)
