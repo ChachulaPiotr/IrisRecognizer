@@ -7,17 +7,17 @@ from unittest import TestCase
 
 #Check creating of matrix
 class TestIris(TestCase):
-    def test_makeMatrix(i=7, j=3, value=3.0):
+    def test_makeMatrix(self, i=7, j=3, value=3.0):
         matrix = bred.makeMatrix(i, j, value)
         assert matrix[6][2] == 3.0
 
     #Check derivative function
-    def test_dsigmoid(y=5):
+    def test_dsigmoid(self, y=5):
         k = bred.dsigmoid(y)
         formula = 1.0 - math.tanh(y) ** 2
         assert k == formula
 
-    def test_CheckSomething(border=50):
+    def test_CheckSomething(self, border=50):
         test_arr = []
 
         with open('iris.txt') as csv_file:
