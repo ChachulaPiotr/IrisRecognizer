@@ -257,13 +257,16 @@ def main(border=50, iterations=1000, N=0.05, nn=1, draw = False):
     # create a network with four input, five hidden, and one output nodes
     n = NN(4, nn, 1)
 
+    # dla 50 instancji kwiata
     border = round(50 * border / 100)
 
+    # teach and verify arrays
     teachVerify(setosa, versicolor, virginica, border)
 
     n.train(teach, iterations, N, draw)
+
+    # testing on teaching and verifying datas
     n.test(teach)
-    # test it
     n.test(verify)
 
 def tests():
@@ -311,7 +314,6 @@ def openFile(file='iris.txt'):
             else:
                 virginica.append(r)
 
-# setting ratio between teaching and veryfing collection
 def teachVerify(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
     for i in range(border):
