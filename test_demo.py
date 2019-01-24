@@ -2,7 +2,7 @@ import math
 import bred
 from bred import *
 import csv
-import numpy as np
+#import numpy as np
 from unittest import TestCase
 
 
