@@ -247,12 +247,6 @@ class NN:
 
 
 def demo(border=50, iterations=1000, N=0.05, nn=1):
-    #ti = TestIris()
-    #ti.test_makeMatrix()
-    #ti.test_CheckSomething(80)
-    #ti.test_dsigmoid(6)
-    unittest.main
-
     #open file with text data
     openFile('iris.txt')
 
