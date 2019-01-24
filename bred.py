@@ -34,7 +34,7 @@ def sigmoid(x):
 def dsigmoid(y):
     return 1.0 - math.tanh(y) ** 2
 
-
+#Main class for neural network
 class NN:
     def __init__(self, ni, nh, no):
         # number of input, hidden, and output nodes
@@ -46,6 +46,8 @@ class NN:
         self.ai = [1.0] * self.ni
         self.ah = [1.0] * self.nh
         self.ao = [1.0] * self.no
+
+        # sum of inputs
         self.sh = [1.0] * self.nh
         self.so = [1.0] * self.no
 
@@ -56,6 +58,8 @@ class NN:
         # create weights
         self.wi = makeMatrix(self.nh, self.ni)
         self.wo = makeMatrix(self.no, self.nh)
+
+        # difrences of weights (for drawing)
         self.ri = makeMatrix(self.nh, self.ni)
         self.ro = makeMatrix(self.no, self.nh)
         # set them to random values
@@ -106,6 +110,7 @@ class NN:
         # self.min[2] = 1.0
         # self.min[3] = 0.1
 
+    # calculating new outputs
     def update(self, inputs):
         inputs = self.normalize(inputs)
         if len(inputs) != self.ni - 1:
@@ -133,6 +138,7 @@ class NN:
             print(self.ao[0])
         return self.ao[:]
 
+    #changing weights and calculating error
     def backPropagate(self, targets, N):
         if len(targets) != self.no:
             raise ValueError('wrong number of target values')
@@ -171,6 +177,7 @@ class NN:
             error = error + 0.5 * (targets[k] - self.ao[k]) ** 2
         return error
 
+    # sorting data depends on predicted values
     def test(self, patterns):
         mb = makeMatrix(3, 3, 0.0)
         for p in patterns:
@@ -196,6 +203,7 @@ class NN:
                 mb[2][2] = mb[2][2] + 1
         self.printmb(mb)
 
+    # shows hom many true and false predicted flowers we have
     def printmb(self, mb):
         print(tabulate([['', 'Setosa', mb[0][0], mb[0][1], mb[0][2]],
                         ['Predicted', 'Versicolor', mb[1][0], mb[1][1], mb[1][2]],
@@ -203,15 +211,7 @@ class NN:
                        headers=['\nSetosa', 'Actual Class\nVersicolor', '\nVirginica'],
                        tablefmt="plain"))
 
-    def weights(self):
-        print('Input weights:')
-        for i in range(self.ni):
-            print(self.wi[i])
-        print()
-        print('Output weights:')
-        for j in range(self.nh):
-            print(self.wo[j])
-
+    # function for training managment
     def train(self, patterns, iterations=400, N=0.1, draw = False):
         # N: learning rate
         im = ImageMaker(self.nh - 1)
@@ -240,6 +240,7 @@ class NN:
                 name = name + 1
                 if error < 0.00001: break
 
+    # normalizing input values
     def normalize(self, inputs, ru=1, rd=-1):
         ninputs = [0.0] * (self.ni - 1)
         for i in range(self.ni - 1):
@@ -263,17 +264,20 @@ def main(border=50, iterations=1000, N=0.05, nn=1, draw = False):
     # teach and verify arrays
     teachVerify(setosa, versicolor, virginica, border)
 
+    # treain network
     n.train(teach, iterations, N, draw)
 
     # testing on teaching and verifying datas
     n.test(teach)
     n.test(verify)
 
+# tests function
 def tests():
     ti = TestIris()
     ti.main()
 
 
+# global arrays
 arr = []
 teach = []
 verify = []
@@ -281,9 +285,10 @@ setosa = []
 versicolor = []
 virginica = []
 
-
+# file parsing function
 def openFile(file='iris.txt'):
     with open(file) as csv_file:
+        # with using csv reader
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             arr.append([])  # array for one flower
@@ -304,6 +309,7 @@ def openFile(file='iris.txt'):
                 print('Something went wrong')
             arr[-1][1].append(row[4])
 
+        # dividing data into specific plants arrays
         k = 0
         for r in arr:
             k = k + 1
@@ -314,6 +320,7 @@ def openFile(file='iris.txt'):
             else:
                 virginica.append(r)
 
+#creating teaching and veryfing data
 def teachVerify(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
     for i in range(border):
@@ -331,4 +338,4 @@ def teachVerify(setosa, versicolor, virginica, border=50):
 
 
 if __name__ == '__main__':
-    main(100, 1, 0.1, 5, True)
+    main(100, 1, 0.1, 5, False)
