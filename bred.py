@@ -2,10 +2,12 @@ import math
 import random
 import string
 import csv
-#import static as static
+# import static as static
 from tabulate import tabulate
 import numpy as np
 from ImageMaker import ImageMaker
+from test_demo import *
+
 random.seed(0)
 
 
@@ -165,13 +167,13 @@ class NN:
         # calculate error
         error = 0.0
         for k in range(len(targets)):
-           error = error + 0.5 * (targets[k] - self.ao[k]) ** 2
+            error = error + 0.5 * (targets[k] - self.ao[k]) ** 2
         return error
 
     def test(self, patterns):
         mb = makeMatrix(3, 3, 0.0)
         for p in patterns:
-            #print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
+            # print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
             self.update(p[0])
             if (p[1][0] == 1) & (round(self.ao[0]) == 1):
                 mb[0][0] = mb[0][0] + 1
@@ -211,7 +213,7 @@ class NN:
 
     def train(self, patterns, iterations=400, N=0.1):
         # N: learning rate
-        im = ImageMaker(self.nh-1)
+        im = ImageMaker(self.nh - 1)
         name = 0
         for p in patterns:
             for i in range(self.ni - 1):
@@ -223,17 +225,17 @@ class NN:
             error = 0.0
             k = 0
             for p in patterns:
-                k = k+1
+                k = k + 1
                 inputs = p[0]
                 targets = p[1]
                 self.update(inputs)
                 error = error + self.backPropagate(targets, N)
-                #im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
-                print(k)
+                # im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
+                # print(k)
             if i % 10 == 0:
                 print('error %-.5f' % error)
-                #im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, name)
-                name = name+1
+                # im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, name)
+                name = name + 1
                 if error < 0.00001: break
 
     def normalize(self, inputs, ru=1, rd=-1):
@@ -242,13 +244,42 @@ class NN:
             ninputs[i] = ((ru - rd) * (float(inputs[i]) - self.min[i]) / (self.max[i] - self.min[i])) + rd
         return ninputs
 
-def demo(border=50, iterations=1000, N=0.05, nn = 1):
-    arr = []
 
-    with open('iris.txt') as csv_file:
+def demo(border=50, iterations=1000, N=0.05, nn=1):
+    ti = TestIris()
+    ti.test_makeMatrix()
+    ti.test_CheckSomething(80)
+    ti.test_dsigmoid(6)
+
+    #open file with text data
+    openFile('iris.txt')
+
+    # create a network with four input, five hidden, and one output nodes
+    n = NN(4, nn, 1)
+
+    border = round(50 * border / 100)
+
+    teachVerify(setosa, versicolor, virginica, border)
+
+    n.train(teach, iterations, N)
+    n.test(teach)
+    # test it
+    n.test(verify)
+
+
+arr = []
+teach = []
+verify = []
+setosa = []
+versicolor = []
+virginica = []
+
+
+def openFile(file='iris.txt'):
+    with open(file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            arr.append([])      # array for one flower
+            arr.append([])  # array for one flower
             arr[-1].append([])  # array for input data
             arr[-1].append([])  # array for output data
 
@@ -265,9 +296,7 @@ def demo(border=50, iterations=1000, N=0.05, nn = 1):
             else:
                 print('Something went wrong')
             arr[-1][1].append(row[4])
-            setosa = []
-            versicolor = []
-            virginica = []
+
             k = 0
             for r in arr:
                 k = k + 1
@@ -278,27 +307,8 @@ def demo(border=50, iterations=1000, N=0.05, nn = 1):
                 else:
                     virginica.append(r)
 
-    # create a network with four input, five hidden, and one output nodes
-    n = NN(4, nn, 1)
-    # train it with some patterns
-
-    #setting ratio between teaching and veryfing collection
-    #border = 95
-    #!!!!
-    border = round(50*border/100)
-
-    calculate(setosa, versicolor, virginica, border)
-
-    n.train(teach, iterations, N)
-    n.test(teach)
-    # test it
-    n.test(verify)
-
-
-teach = []
-verify = []
-
-def calculate(setosa, versicolor, virginica, border=50):
+# setting ratio between teaching and veryfing collection
+def teachVerify(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
     for i in range(border):
         teach.append(setosa[rows[i]])
@@ -312,6 +322,7 @@ def calculate(setosa, versicolor, virginica, border=50):
         teach.append(virginica[rows[i]])
     for i in range(border, 50):
         verify.append(virginica[rows[i]])
+
 
 if __name__ == '__main__':
     demo(75, 1000, 0.01, 5)

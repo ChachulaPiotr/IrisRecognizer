@@ -1,15 +1,22 @@
 import math
 import bred
 from bred import *
+import csv
 import numpy as np
 from unittest import TestCase
 
 
-#Check creating of matrix
 class TestIris(TestCase):
+    # Check creating of matrix
     def test_makeMatrix(self, i=7, j=3, value=3.0):
         matrix = bred.makeMatrix(i, j, value)
         assert matrix[6][2] == 3.0
+
+    # Check derivative function
+    def sigmoid(self, x=5):
+        k = bred.sigmoid(x)
+        formula = math.tanh(x)
+        assert k == formula
 
     #Check derivative function
     def test_dsigmoid(self, y=5):
@@ -55,7 +62,7 @@ class TestIris(TestCase):
 
         border = round(50*border/100)
 
-        bred.calculate(setosa, versicolor, virginica, border)
+        bred.teachVerify(setosa, versicolor, virginica, border)
 
         lenTeach = len(bred.teach)
         lenVerify = len(bred.verify)
@@ -64,6 +71,3 @@ class TestIris(TestCase):
                (lenTeach == 3*border) & (lenVerify == 3*(50 - border))
 
 
-
-#test_makeMatrix()
-#test_CheckSomething(80)
