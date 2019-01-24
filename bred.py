@@ -250,21 +250,24 @@ def main(border=50, iterations=1000, N=0.05, nn=1):
     print(border)
 
     #Some tests
-    #tests()
+    tests()
 
     #open file with text data
     openFile('iris.txt')
 
-    # create a network with four input, five hidden, and one output nodes
+    # create a network with four input, n hidden, and one output nodes
     n = NN(4, nn, 1)
 
+    #dla 50 instancji kwiata
     border = round(50 * border / 100)
 
+    #teach and verify arrays
     teachVerify(setosa, versicolor, virginica, border)
 
     n.train(teach, iterations, N)
+
+    #testing on teaching and verifying datas
     n.test(teach)
-    # test it
     n.test(verify)
 
 def tests():
@@ -284,7 +287,7 @@ def openFile(file='iris.txt'):
     with open(file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            arr.append([])  # array for one flower
+            arr.append([])      # array for one flower
             arr[-1].append([])  # array for input data
             arr[-1].append([])  # array for output data
 
@@ -312,10 +315,8 @@ def openFile(file='iris.txt'):
             else:
                 virginica.append(r)
 
-# setting ratio between teaching and veryfing collection
 def teachVerify(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
-    print(border)
     for i in range(border):
         teach.append(setosa[rows[i]])
         #print(rows[i])
