@@ -7,6 +7,7 @@ from tabulate import tabulate
 import numpy as np
 from ImageMaker import ImageMaker
 from test_demo import *
+import unittest
 
 random.seed(0)
 
@@ -173,7 +174,7 @@ class NN:
     def test(self, patterns):
         mb = makeMatrix(3, 3, 0.0)
         for p in patterns:
-            # print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
+            print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
             self.update(p[0])
             if (p[1][0] == 1) & (round(self.ao[0]) == 1):
                 mb[0][0] = mb[0][0] + 1
@@ -246,10 +247,9 @@ class NN:
 
 
 def demo(border=50, iterations=1000, N=0.05, nn=1):
-    ti = TestIris()
-    ti.test_makeMatrix()
-    ti.test_CheckSomething(80)
-    ti.test_dsigmoid(6)
+    print(border)
+
+    tests()
 
     #open file with text data
     openFile('iris.txt')
@@ -265,6 +265,10 @@ def demo(border=50, iterations=1000, N=0.05, nn=1):
     n.test(teach)
     # test it
     n.test(verify)
+
+def tests():
+    ti = TestIris()
+    ti.main()
 
 
 arr = []
@@ -297,21 +301,23 @@ def openFile(file='iris.txt'):
                 print('Something went wrong')
             arr[-1][1].append(row[4])
 
-            k = 0
-            for r in arr:
-                k = k + 1
-                if k <= 50:
-                    setosa.append(r)
-                elif k <= 100:
-                    versicolor.append(r)
-                else:
-                    virginica.append(r)
+        k = 0
+        for r in arr:
+            k = k + 1
+            if k <= 50:
+                setosa.append(r)
+            elif k <= 100:
+                versicolor.append(r)
+            else:
+                virginica.append(r)
 
 # setting ratio between teaching and veryfing collection
 def teachVerify(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
+    print(border)
     for i in range(border):
         teach.append(setosa[rows[i]])
+        #print(rows[i])
     for i in range(border, 50):
         verify.append(setosa[rows[i]])
     for i in range(border):
@@ -325,4 +331,4 @@ def teachVerify(setosa, versicolor, virginica, border=50):
 
 
 if __name__ == '__main__':
-    demo(75, 1000, 0.01, 5)
+    demo(80, 1000, 0.01, 5)

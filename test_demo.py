@@ -2,6 +2,7 @@ import math
 import bred
 from bred import *
 import csv
+import unittest
 import numpy as np
 from unittest import TestCase
 
@@ -10,19 +11,19 @@ class TestIris(TestCase):
     # Check creating of matrix
     def test_makeMatrix(self, i=7, j=3, value=3.0):
         matrix = bred.makeMatrix(i, j, value)
-        assert matrix[6][2] == 3.0
+        self.assertTrue(matrix[6][2] == 3.0)
 
-    # Check derivative function
-    def sigmoid(self, x=5):
+    # Check tanh function
+    def test_sigmoid(self, x=5):
         k = bred.sigmoid(x)
         formula = math.tanh(x)
-        assert k == formula
+        self.assertTrue(k == formula)
 
     #Check derivative function
     def test_dsigmoid(self, y=5):
         k = bred.dsigmoid(y)
         formula = 1.0 - math.tanh(y) ** 2
-        assert k == formula
+        self.assertTrue(k == formula)
 
     def test_CheckSomething(self, border=50):
         test_arr = []
@@ -67,7 +68,10 @@ class TestIris(TestCase):
         lenTeach = len(bred.teach)
         lenVerify = len(bred.verify)
 
-        assert (test_arr[101] == virginica[1]) & (setosa[49][-1][0] == 1) & \
-               (lenTeach == 3*border) & (lenVerify == 3*(50 - border))
+        self.assertTrue((test_arr[101] == virginica[1]) & (setosa[49][-1][0] == 1) & \
+               (lenTeach == 3*border) & (lenVerify == 3*(50 - border)))
+
+    def main(self):
+        unittest.main()
 
 
