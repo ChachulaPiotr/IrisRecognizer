@@ -6,7 +6,7 @@ import csv
 from tabulate import tabulate
 import numpy as np
 from ImageMaker import ImageMaker
-from test_demo import *
+from test_iris import *
 import unittest
 
 random.seed(0)
@@ -246,10 +246,11 @@ class NN:
         return ninputs
 
 
-def demo(border=50, iterations=1000, N=0.05, nn=1):
+def main(border=50, iterations=1000, N=0.05, nn=1):
     print(border)
 
-    tests()
+    #Some tests
+    #tests()
 
     #open file with text data
     openFile('iris.txt')
@@ -317,11 +318,7 @@ def teachVerify(setosa, versicolor, virginica, border=50):
     print(border)
     for i in range(border):
         teach.append(setosa[rows[i]])
-<<<<<<< HEAD
         #print(rows[i])
-=======
-        print(rows[i])
->>>>>>> 33bd1c4602ba989fd4ed55d485ef4086e7b0ea81
     for i in range(border, 50):
         verify.append(setosa[rows[i]])
     for i in range(border):
@@ -335,8 +332,4 @@ def teachVerify(setosa, versicolor, virginica, border=50):
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-    demo(80, 1000, 0.01, 5)
-=======
-    demo(100, 1000, 0.01, 5)
->>>>>>> 33bd1c4602ba989fd4ed55d485ef4086e7b0ea81
+    main(80, 1000, 0.01, 5)

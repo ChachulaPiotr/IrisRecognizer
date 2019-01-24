@@ -2,12 +2,9 @@ import math
 import bred
 from bred import *
 import csv
-<<<<<<< HEAD
 import unittest
 import numpy as np
-=======
 #import numpy as np
->>>>>>> 33bd1c4602ba989fd4ed55d485ef4086e7b0ea81
 from unittest import TestCase
 
 
