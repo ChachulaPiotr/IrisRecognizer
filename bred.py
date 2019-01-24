@@ -174,7 +174,7 @@ class NN:
     def test(self, patterns):
         mb = makeMatrix(3, 3, 0.0)
         for p in patterns:
-            print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
+            # print(p[0], '->', self.update(p[0]), '==', round(self.update(p[0])[0]), '->', p[1])
             self.update(p[0])
             if (p[1][0] == 1) & (round(self.ao[0]) == 1):
                 mb[0][0] = mb[0][0] + 1
@@ -212,7 +212,7 @@ class NN:
         for j in range(self.nh):
             print(self.wo[j])
 
-    def train(self, patterns, iterations=400, N=0.1):
+    def train(self, patterns, iterations=400, N=0.1, draw = False):
         # N: learning rate
         im = ImageMaker(self.nh - 1)
         name = 0
@@ -231,8 +231,9 @@ class NN:
                 targets = p[1]
                 self.update(inputs)
                 error = error + self.backPropagate(targets, N)
-                # im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
-                # print(k)
+                if draw:
+                    im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, k)
+                    print(k)
             if i % 10 == 0:
                 print('error %-.5f' % error)
                 # im.makeImage(p[0], p[1][0], self.ao[0], self.ri, self.ro, name)
@@ -246,28 +247,23 @@ class NN:
         return ninputs
 
 
-def main(border=50, iterations=1000, N=0.05, nn=1):
-    print(border)
-
+def main(border=50, iterations=1000, N=0.05, nn=1, draw = False):
     #Some tests
-    tests()
+    #tests()
 
     #open file with text data
     openFile('iris.txt')
 
-    # create a network with four input, n hidden, and one output nodes
+    # create a network with four input, five hidden, and one output nodes
     n = NN(4, nn, 1)
 
-    #dla 50 instancji kwiata
     border = round(50 * border / 100)
 
-    #teach and verify arrays
     teachVerify(setosa, versicolor, virginica, border)
 
-    n.train(teach, iterations, N)
-
-    #testing on teaching and verifying datas
+    n.train(teach, iterations, N, draw)
     n.test(teach)
+    # test it
     n.test(verify)
 
 def tests():
@@ -287,7 +283,7 @@ def openFile(file='iris.txt'):
     with open(file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            arr.append([])      # array for one flower
+            arr.append([])  # array for one flower
             arr[-1].append([])  # array for input data
             arr[-1].append([])  # array for output data
 
@@ -315,11 +311,11 @@ def openFile(file='iris.txt'):
             else:
                 virginica.append(r)
 
+# setting ratio between teaching and veryfing collection
 def teachVerify(setosa, versicolor, virginica, border=50):
     rows = np.random.permutation(50)
     for i in range(border):
         teach.append(setosa[rows[i]])
-        #print(rows[i])
     for i in range(border, 50):
         verify.append(setosa[rows[i]])
     for i in range(border):
@@ -333,4 +329,4 @@ def teachVerify(setosa, versicolor, virginica, border=50):
 
 
 if __name__ == '__main__':
-    main(80, 1000, 0.01, 5)
+    main(100, 1, 0.1, 5, True)
